@@ -1,0 +1,44 @@
+package HW1_src;
+
+
+import java.io.*;
+import java.net.*;
+import java.util.*;
+//client program
+public class client {
+ private Socket socket = null;
+ public client(String address, int port)
+ {
+     try {
+        
+         Scanner scanner = new Scanner(System.in);//값을 입력받기위한 scanner 정의
+         socket = new Socket(address, port);//socket 정의
+         
+         System.out.println("OK");//소켓이 잘 생성되면 user 에게 ok 메세지 출력
+
+         DataInputStream in = new DataInputStream(socket.getInputStream());//input stream 정의
+         DataOutputStream out = new DataOutputStream(socket.getOutputStream());//output stream 정의
+      
+         while (true) {
+             System.out.println("enter <int> <operator> <int>");//프로토콜 형식을 user 에게 알려줌
+             String tmp = scanner.nextLine();//user 에게 값을 입력 받음
+
+             if (tmp.equals("end"))//user 가 end 를 입력했을경우 client 종료
+                 break;
+             out.writeUTF(tmp);//calculation request
+
+             String answer = in.readUTF();//correct result
+             System.out.println(answer);//user 에게 correct result 값을 출력
+         }
+     }
+     catch (Exception e) {//예외 처리
+         System.out.println("connection error");
+     }
+ }
+
+ public static void main(String args[])
+ {
+     
+     client client = new client("127.0.0.1", 7777);//port number 가 7777 인 서버에 연결하는 client 생성
+ }
+}
