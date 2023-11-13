@@ -1,0 +1,74 @@
+package HW1_src;
+
+//server program
+import java.io.*;
+import java.net.*;
+import java.util.*;
+//server 정의
+public class server {
+//socket 생성
+ private Socket socket = null;
+
+//port number 를 받는 server 정의
+ public server(int port)
+ {
+     try {
+      //server socket 생성 
+         ServerSocket serversocket = new ServerSocket(port);
+         Socket socket = serversocket.accept();//server socket 이 accept 했을때 socket 생성
+
+   
+         DataInputStream in = new DataInputStream(socket.getInputStream());//input stream 정의
+         DataOutputStream out = new DataOutputStream(socket.getOutputStream());//데이터를 보내기위한 output stream 정의
+
+         while (true) {//end 라는 메세지를 받기전까지 client 의 calculation request 메세지 수행
+             String input = in.readUTF();//calculation request 메세지를 읽어옴
+             if (input.equals("end"))//end 를 입력 받았을 경우 종료
+                 break;
+             System.out.println("received");
+             int result = 0;
+
+             StringTokenizer string = new StringTokenizer(input);//읽어온 메세지를 프로토콜기반으로 해석하기위하여 토큰을 사용
+             
+             int integer1 = Integer.parseInt(string.nextToken());//첫번째 정수를 읽어옴
+             String operation = string.nextToken();//연산자를 읽어옴
+             int integer2 = Integer.parseInt(string.nextToken());//두번째 정수를 읽어옴
+             if(string.hasMoreTokens()) {//프로토콜에 정의에 따라서 위반되는 더 많은 데이터가 들어온 경우 그에맞는 결과를 반환 후 종료
+            	 out.writeUTF("Incorrect : Too many arguments");
+            	 break;
+             }
+
+             
+             if (operation.equals("+")) {//덧셈 연산자
+                 result = integer1 + integer2;
+             }
+             else if (operation.equals("-")) {//빼기 연산자
+                 result = integer1 - integer2;
+             }
+             else if (operation.equals("*")) {//곱셈 연산자
+                 result = integer1 * integer2;
+             }
+             else if (operation.equals("/")) {//나눗셈 연산자
+                 result = integer1 / integer2;
+             }
+             if (operation.equals("/") && integer2 == 0) {//나눗셈 연산자에서 나누는 수가 0인경의 예외처리
+            	 out.writeUTF("Incorrect : divided by zero");
+            	 break;
+            	 }
+          
+             
+             System.out.println("sending");
+             out.writeUTF("correct answer = " + Integer.toString(result));//string 의 형태로 프로토콜에 맞춰 result 값을 client 에게 반환
+         }
+     }
+     catch (Exception e) {//예외처리
+         System.out.println("Error");
+     }
+     
+ }
+
+ public static void main(String args[])
+ {
+     server server = new server(7777);//포트번호가 7777 인 server 를 생성
+ }
+}
